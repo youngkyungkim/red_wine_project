@@ -1,0 +1,1012 @@
+---
+title: "Project on Red Wine Quality"
+output: html_document
+---
+
+# Project on Red Wine Quality
+
+This project explores each variables and find out which variables are leading influencer on quality of red wine. 
+
+## Univariate Plots Section
+
+```{r}
+setwd("~/Downloads")
+yo<- read.csv('yogurt.csv')
+setwd('~/Downloads')
+wine <- read.csv('wineQualityReds.csv')
+dim(wine)
+names(wine)
+str(wine)
+summary(wine)
+```
+As you could see above, there are 12 variables and 1599 observations. 
+
+I will now look at the distribution of each 12 variables. 
+
+### Fixed Acidity(tartaric acid - g / dm^3)
+
+```{r}
+library(ggplot2)
+ggplot(aes(x=fixed.acidity), data=wine)+
+  geom_histogram()
+
+ggplot(aes(x=fixed.acidity), data=wine)+
+  geom_histogram(bins = 50)
+
+summary(wine$fixed.acidity)
+table(wine$fixed.acidity)
+```
+
+From looking at the histogram of the fixed acidity, we could notice that distribution of fixed.acidty is normal with peak around at 7.8. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+
+
+### Volatile Acidity(acetic acid - g / dm^3)
+
+```{r}
+ggplot(aes(x=volatile.acidity), data = wine)+
+  geom_histogram()
+ggplot(aes(x=(volatile.acidity^(1/3))), data = wine)+
+  geom_histogram(bins = 30)
+summary(wine$volatile.acidity)
+summary(wine$volatile.acidity^(1/3))
+```
+
+From looking at the histogram of the volatile.acidity^(1/3), we could notice that distribution of volatile.acidity^(1/3) is normal with peak around at 0.85. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+### Citric Acid (g / dm^3)
+```{r}
+ggplot(aes(x=citric.acid), data = wine)+
+  geom_histogram()
+
+ggplot(aes(x=(sqrt(citric.acid))), data = wine)+
+  geom_histogram()
+
+summary(wine$citric.acid)
+
+```
+
+From looking at the histogram of the sqrt(citric.acid), we could notice that distribution of sqrt(citric.acid) is normal with peak around at 0.5 and 0.75. There is another peak in 0 since sqrt of 0 is 0, which means transformation did not have effect on 0. 
+
+```{r}
+table(wine$citric.acid)
+```
+
+There are 132 wines that have 0 citric acid. 
+
+### Residual Sugar (g / dm^3)
+
+```{r}
+ggplot(aes(x=residual.sugar), data = wine)+
+  geom_histogram()
+
+ggplot(aes(x=(log10(residual.sugar))), data = wine)+
+  geom_histogram()
+
+summary(wine$residual.sugar)
+```
+
+From looking at the histogram of the log10(residual.sugar), we could notice that distribution of log10(residual.sugar) is normal with peak around at 0.3 and 0.4. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+
+### Chlorides (sodium chloride - g / dm^3)
+
+```{r}
+ggplot(aes(x=chlorides), data = wine)+
+  geom_histogram()
+
+ggplot(aes(x=(log10(chlorides))), data = wine)+
+  geom_histogram()
+
+summary(wine$chlorides)
+```
+
+From looking at the histogram of the log10(chlorides), we could notice that distribution of log10(chlorides) is normal with peak around at -1.1 and -1.2. There is suspected outlier on the both sides and I should consider whether to exclude the outlier or not. 
+
+### Free Sulfur Dioxide (mg / dm^3)
+
+```{r}
+ggplot(aes(x=free.sulfur.dioxide), data = wine)+
+  geom_histogram(bins=50)
+
+ggplot(aes(x=(sqrt(free.sulfur.dioxide))), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$free.sulfur.dioxide)
+```
+
+From looking at the histogram of the sqrt(free.sulfur.dioxide), we could notice that distribution of sqrt(free.sulfur.dioxide) is skewed to right with peaks around at 2.5 and 4. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+### Total Sulfur Dioxide (mg / dm^3)
+
+```{r}
+ggplot(aes(x=total.sulfur.dioxide), data = wine)+
+  geom_histogram(bins=50)
+
+ggplot(aes(x=(log10(total.sulfur.dioxide))), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$total.sulfur.dioxide)
+```
+
+From looking at the histogram of the log10(total.sulfur.dioxide), we could notice that distribution of log10(total.sulfur.dioxide) is normal with peaks around at 1.5 and 1.75. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+In total sulfur dioxide there is free and bound forms. I will make another variable for bound sulfur dioxide by subtracting free sulfur dioxide from total sulfur dioxide.
+
+### Bound Sulfur dioxide (mg / dm^3)
+
+```{r}
+wine$bound.sulfur.dioxide <-  wine$total.sulfur.dioxide-wine$free.sulfur.dioxide
+ggplot(aes(x=bound.sulfur.dioxide), data = wine)+
+  geom_histogram(bins=50)
+
+ggplot(aes(x=(log10(bound.sulfur.dioxide))), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$bound.sulfur.dioxide)
+
+```
+
+From looking at the histogram of the log10(bound.sulfur.dioxide), we could notice that distribution of log10(bound.sulfur.dioxide) is normal with peaks around at 1 and 1.5. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+### Density (g / cm^3)
+
+```{r}
+ggplot(aes(x=density), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$density)
+table(wine$density)
+```
+
+From looking at the histogram of the density, we could notice that distribution of density is normal with peak around at 0.997.
+
+### pH
+
+```{r}
+ggplot(aes(x=pH), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$pH)
+```
+
+From looking at the histogram of the pH, we could notice that distribution of pH is normal with peak around at 3.25 and 3.3.
+
+### Sulphates (potassium sulphate - g / dm3)
+
+```{r}
+ggplot(aes(x=sulphates), data = wine)+
+  geom_histogram(bins=50)
+
+ggplot(aes(x=(log10(sulphates))), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$sulphates)
+```
+
+From looking at the histogram of the log10(sulphates), we could notice that distribution of log10(sulphates) is normal to right with peaks around at -0.2. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+### Alcohol (% by volume)
+
+```{r}
+ggplot(aes(x=alcohol), data = wine)+
+  geom_histogram(bins=50)
+
+summary(wine$alcohol)
+```
+
+From looking at the histogram of the alcohol, we could notice that distribution of alcohol is skewed to right with peaks around at 9.5. There is suspected outlier on the right and I should consider whether to exclude the outlier or not. 
+
+### Quality (score between 0 and 10)
+
+```{r}
+ggplot(aes(x=quality), data = wine)+
+  geom_histogram(bins = 6)+
+  scale_x_continuous(name = "quality" ,c(3,4,5,6,7,8))
+
+summary(wine$quality)
+table(wine$quality)
+```
+
+From looking at the table above, we could notice that most wine received 5 or 6 on their quality. 
+
+## Analysis
+
+There are 1599 red wine in the dataset with 13 variables, including that I have made. 
+
+ data.frame':	1599 obs. of  14 variables:
+ $ X                   : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ fixed.acidity       : num  7.4 7.8 7.8 11.2 7.4 7.4 7.9 7.3 7.8 7.5 ...
+ $ volatile.acidity    : num  0.7 0.88 0.76 0.28 0.7 0.66 0.6 0.65 0.58 0.5 ...
+ $ citric.acid         : num  0 0 0.04 0.56 0 0 0.06 0 0.02 0.36 ...
+ $ residual.sugar      : num  1.9 2.6 2.3 1.9 1.9 1.8 1.6 1.2 2 6.1 ...
+ $ chlorides           : num  0.076 0.098 0.092 0.075 0.076 0.075 0.069 0.065 0.073 0.071 ...
+ $ free.sulfur.dioxide : num  11 25 15 17 11 13 15 15 9 17 ...
+ $ total.sulfur.dioxide: num  34 67 54 60 34 40 59 21 18 102 ...
+ $ density             : num  0.998 0.997 0.997 0.998 0.998 ...
+ $ pH                  : num  3.51 3.2 3.26 3.16 3.51 3.51 3.3 3.39 3.36 3.35 ...
+ $ sulphates           : num  0.56 0.68 0.65 0.58 0.56 0.56 0.46 0.47 0.57 0.8 ...
+ $ alcohol             : num  9.4 9.8 9.8 9.8 9.4 9.4 9.4 10 9.5 10.5 ...
+ $ quality             : int  5 5 5 6 5 5 5 7 7 5 ...
+ $ bound.sulfur.dioxide: num  23 42 39 43 23 27 44 6 9 85 ...
+
+### Observation
+
+- median for fixed acidity is 7.9
+- mean for volatile acidity is 0.5278
+- most red wine had 0 ~ 0.5 citric acid
+- median for residual sugar is 2.2
+- median for chlorides is 0.079
+- median for free sulfur dioxide is 14
+- median for total sulfur dioxide is 38
+- median for bound sulfur dioxide is 21
+- mean for density is 0.9967
+- mean for pH is 3.311
+- median for sulphates 0.62
+- median for alcohol is 10.20
+
+I have added bound sulfur dioxide variable because bound sulfur might be the one that influence the quality of the wine. 
+
+I also had to transform various variables to make the distribution normal. Most of the graphes were skewed to right, so I used log10 and sqrt function to make the distribution normal.
+
+For next secion, I will explore to determine which variables are best for predicting the quality of the red wine.
+
+## Bivariate Plots
+
+```{r}
+cor(wine)
+cor(wine)[13,]
+```
+
+From looking at above, we could notice that volatile acidity, alcohol, and sulphates of red wine has highest correlation to quality of red wine. 
+
+```{r}
+library(GGally)
+library(scales)
+library(memisc)
+
+ggpairs(wine, 
+        lower = list(continuous = wrap("points", shape = I('.'))), 
+        upper = list(combo = wrap("box", outlier.shape = I('.'))))
+```
+
+From looking at the table above we could notice that there might be Multicollinearity problem if we look at multivariate relationship. I will consider this fact in the next section for multivariate relatinoship. 
+
+From looking at the table above it is hard to notice whether there is linear relationship between variables with quality of red wine, especially when quality is more of a categorical variable. 
+
+I will look closely into it through graphing and using anova test.
+
+### Quality x Fixed Acidity
+
+```{r}
+ggplot(aes(x=fixed.acidity, y=quality), data = wine)+
+  geom_point()
+```
+
+From looking at the scatter plot above, it is hard to notice the relationship between red wine quality and fixed acidity, especially since wine quality is a categorical variable.
+I will look into box plots to examine the relationship and I will change the quality as a factor from numeric to make a boxplot. 
+
+```{r}
+wine$quality <- as.factor(wine$quality)
+
+str(wine)
+
+ggplot(aes(y=fixed.acidity, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=fixed.acidity, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and fixed acidity.
+
+```{r}
+acid_quality <- aov(fixed.acidity ~ quality, data = wine)
+summary(acid_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and fixed acidity.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(acid_quality)
+plot(TukeyHSD(acid_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 7-4, 7-5 and 7-6.
+
+### Quality x Volatile Acidity
+
+```{r}
+ggplot(aes(y=volatile.acidity, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=volatile.acidity, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above, we could notice some relationship between volatile acidity and quality. It seems like volatile acidity decrease as quality of wine increases.
+
+```{r}
+vol_acid_quality <- aov(volatile.acidity ~ quality, data = wine)
+summary(vol_acid_quality )
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and volatile acidity.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(vol_acid_quality)
+plot(TukeyHSD(vol_acid_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between every variables except 6-8 and 7-8. 
+From looking at the graph above, I am considering whether I should group the quality into three sections as low(3-4), medium(5-6), and high(7-8) in order to better explained the relationship between volatile acidity and quality. 
+
+### Quality x Citric Acid
+
+```{r}
+ggplot(aes(y=citric.acid, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=citric.acid, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above, we could notice some relationship between citric acid and quality. It seems like citric acid increase as quality of wine increases.
+
+```{r}
+cit_acid_quality <- aov(citric.acid ~ quality, data = wine)
+summary(cit_acid_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and citric acid.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(cit_acid_quality)
+plot(TukeyHSD(cit_acid_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 7-3, 8-3, 6-4, 7-4, 8-4, 6-5, 7-5, 8-5, and 7-6. 
+
+### Quality x Residual Sugar
+
+```{r}
+ggplot(aes(y=residual.sugar, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=residual.sugar, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)+
+  coord_cartesian(ylim = c(1,5))
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and residual sugar.
+
+```{r}
+sug_quality <- aov(residual.sugar ~ quality, data = wine)
+summary(sug_quality)
+```
+
+From looking at the anova table, we cannot reject null hypothesis that there isn't significant relationship between quality and residual sugar. 
+
+### Quality x Chlorides
+
+```{r}
+ggplot(aes(y=chlorides, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=chlorides, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)+
+  coord_cartesian(ylim = c(0,0.2))
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and chlorides.
+
+
+```{r}
+chl_acid_quality <- aov(chlorides~ quality, data = wine)
+summary(chl_acid_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and chlorides.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(chl_acid_quality)
+plot(TukeyHSD(chl_acid_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 7-3, 8-3, 6-5, and 7-5. 
+
+### Quality x Free Sulfur Dioxide
+
+```{r}
+ggplot(aes(y=free.sulfur.dioxide, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=free.sulfur.dioxide, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and free sulfur dioxide.
+
+
+```{r}
+free_sul_quality <- aov(free.sulfur.dioxide~ quality, data = wine)
+summary(free_sul_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and free sulfur dioxide.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(free_sul_quality)
+plot(TukeyHSD(free_sul_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 5-4 and 7-5. 
+
+### Quality x Bound Sulfur Dioxide
+
+```{r}
+ggplot(aes(y=bound.sulfur.dioxide, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=bound.sulfur.dioxide, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)+
+  coord_cartesian(ylim = c(0,125))
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and bound sulfur dioxide.
+
+
+```{r}
+bound_sul_quality <- aov(bound.sulfur.dioxide~ quality, data = wine)
+summary(bound_sul_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and bound sulfur dioxide.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(bound_sul_quality)
+plot(TukeyHSD(bound_sul_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 5-3, 5-4, 6-5, 7-5 and 8-5. 
+
+### Quality x Total Sulfur Dioxide
+
+```{r}
+ggplot(aes(y=total.sulfur.dioxide, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=total.sulfur.dioxide, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)+
+  coord_cartesian(ylim = c(0,160))
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and total sulfur dioxide.
+
+
+```{r}
+total_sul_quality <- aov(total.sulfur.dioxide~ quality, data = wine)
+summary(total_sul_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and total sulfur dioxide.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(total_sul_quality)
+plot(TukeyHSD(total_sul_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 5-3, 5-4, 6-5, 7-5 and 8-5.
+
+### Quality x Density
+
+```{r}
+ggplot(aes(y=density, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=density, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above we don't see much strong relationship between quality and density.
+
+
+```{r}
+den_quality <- aov(density~ quality, data = wine)
+summary(den_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and density.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(den_quality)
+plot(TukeyHSD(den_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 8-3, 6-5, 7-5, 7-6 and 8-5.
+
+### Quality x pH
+
+```{r}
+ggplot(aes(y=pH, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=pH, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above it seems like ph level decrease as quality increase. However, we should not conclude anything yet. 
+
+
+```{r}
+ph_quality <- aov(pH~ quality, data = wine)
+summary(ph_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and pH.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(ph_quality)
+plot(TukeyHSD(ph_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 5-4, 6-4, and 7-4.
+
+### Quality x Sulphates
+
+```{r}
+ggplot(aes(y=sulphates, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=sulphates, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)+
+  coord_cartesian(ylim = c(0,1.1))
+```
+
+From looking at the boxplots above it seems like sulphates level increase as quality increase. However, we should not conclude anything yet. 
+
+
+```{r}
+sulp_quality <- aov(sulphates~ quality, data = wine)
+summary(sulp_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and sulphates.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(sulp_quality)
+plot(TukeyHSD(sulp_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 7-3, 8-3, 6-4, 7-4, 8-4, 6-5, 7-5, 8-5, and 7-6.
+
+### Quality x Alcohol
+
+```{r}
+ggplot(aes(y=alcohol, x=quality), data = wine)+
+  geom_boxplot()
+
+ggplot(aes(y=alcohol, x=quality), data = wine)+
+  geom_boxplot(outlier.shape = NA)
+```
+
+From looking at the boxplots above it seems like alcohol level increase as quality increase. However, we should not conclude anything yet. 
+
+
+```{r}
+alc_quality <- aov(alcohol~ quality, data = wine)
+summary(alc_quality)
+```
+
+From looking at the anova table, we could accept alternative hypothesis that there is a significant relationship between quality and alcohol.
+However, anova table doesn't tell us which quality groups are different from each other. 
+I will futher look into the which ones are different through post hoc test.
+
+```{r}
+TukeyHSD(alc_quality)
+plot(TukeyHSD(alc_quality))
+```
+
+From the graph above, we could notice that there is a significant difference between 7-3, 8-3, 7-4, 8-4, 6-5, 7-5, 8-5, 8-6 and 7-6.
+
+## Bivariate Analysis
+
+F-value
+- Quality x Fixed Acidity: 6.283
+- Quality x Volatile Acidity: 60.91
+- Quality x Citric Acid: 19.69
+- Quality x Residual Sugar: 1.053
+- Quality x Chlorides: 6.036
+- Quality x Free Sulfur Dioxide: 4.754
+- Quality x Bound Sulfur Dioxide: 29.36
+- Quality x Total Sulfur Dioxide: 25.48
+- Quality x Density: 13.4
+- Quality x pH: 4.342
+- Quality x Sulphates: 22.27
+- Quality x Alcohol: 115.9
+
+Only residual sugar has low F-value to reject null hypothesis. 
+Alcohol, volatile acidity, bound sulfur dioxide, sulphates, and citric acid had high f-value, so I will use these variables to further investigate the relationship. 
+
+From observation of bivariate plot, I noticed that it will better to reorganize quality into three categories as low, medium, and high. 
+
+```{r}
+wine$quality_3 <- cut(as.numeric(as.character(wine$quality)), c(2,4,6,9), labels=c("low", "medium", "high"))
+```
+
+## Multivariate Plots Section
+
+### Quality x Alcohol x Volatile Acidity
+
+```{r}
+library(reshape2)
+
+ggplot(aes(x=alcohol,color = quality_3, y=(volatile.acidity^(1/3))), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=(volatile.acidity^(1/3))) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+```
+
+From looking at the graph it is hard to notice any relationship. Instead of dividing quality into low, medium, and high, I will also create a variable to divide quality into low(3~5) and high(6~8). 
+
+```{r}
+wine$quality_2 <- cut(as.numeric(as.character(wine$quality)), c(2,5,9), labels=c("low", "high"))
+
+ggplot(aes(x=alcohol,color = quality_2, y=(volatile.acidity^(1/3))), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=(volatile.acidity^(1/3))) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+Even dividing quality into two categories, it doesn't seems like there is a relationship. I will futher explore with other variables. 
+
+### Quality x Alcohol x Bound Sulfur Dioxide
+
+```{r}
+ggplot(aes(x=alcohol,color = quality_3, y=log10(bound.sulfur.dioxide)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=log10(bound.sulfur.dioxide)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=alcohol,color = quality_2, y=log10(bound.sulfur.dioxide)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=log10(bound.sulfur.dioxide)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph it is hard to notice any relationship. Only thing I could notice is that low quality red wine is less dispersed with alcohol level compared to high quality red wine. 
+I will futher explore with other variables. 
+
+### Quality x Alcohol x Sulphates
+
+```{r}
+ggplot(aes(x=alcohol,color = quality_3, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=alcohol,color = quality_2, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph it is hard to notice any relationship. Only thing I could notice is that low alcohol level wine is more dispersed in sulphates level compared to high alcohol level. 
+I will futher explore with other variables. 
+
+### Quality x Alcohol x Citric Acid
+
+```{r}
+ggplot(aes(x=alcohol,color = quality_3, y=(citric.acid)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=(citric.acid)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=alcohol,color = quality_2, y=(citric.acid)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=(citric.acid)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph it is hard to notice any relationship. 
+I will futher explore with other variables. 
+
+### Quality x Alcohol x Citric Acid
+
+```{r}
+ggplot(aes(x=alcohol,color = quality_3, y=(citric.acid)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=(citric.acid)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=alcohol,color = quality_2, y=(density)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=alcohol, y=(citric.acid)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph it is hard to notice any relationship except high quality  wine is more dispersed in alcohol level. 
+I will futher explore with other variables. 
+
+### Quality x Volatile Acidity x Bound Sulfur Dioxide
+
+```{r}
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_3, y=log10(bound.sulfur.dioxide)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=log10(bound.sulfur.dioxide)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_2, y=log10(bound.sulfur.dioxide)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=log10(bound.sulfur.dioxide)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph, it is hard to notice any relationship. 
+I will futher explore with other variables. 
+
+### Quality x Volatile Acidity x Sulphates
+
+```{r}
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_3, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_2, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+
+```
+
+From looking at the graph, it is hard to notice any relationship but we could notice that high quality wine tends to have higher sulphates and lower volatile acidity compared to low quality wine. 
+I will also put alcohol variable into graph to observe the relationship. I will divide alcohol into 5 categories to plot the graph.
+
+```{r}
+wine$alcohol_lev <- cut(wine$alcohol, breaks = 5, labels = c("very low", "low", "medium", "high", "very high"))
+
+ggplot(aes(x=(volatile.acidity)^(1/3), color = alcohol_lev, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)+
+  facet_wrap(~quality_2)
+```
+
+From looking at the plot above, we could notice that high quality wine tends to have higher alcohol level, higher sulphate level, and low volatile acidity compared to low quality wine. 
+
+I will futher explore with other variables. 
+
+### Quality x Volatile Acidity x Sulphates
+
+```{r}
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_3, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_2, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph, it is hard to notice any relationship but we could notice that high quality wine tends to have higher sulphates and lower volatile acidity compared to low quality wine. 
+I will futher explore with other variables. 
+
+### Quality x Volatile Acidity x Citric Acid
+
+```{r}
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_3, y=(citric.acid)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=(citric.acid)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_2, y=(citric.acid)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=(volatile.acidity)^(1/3), y=(citric.acid)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph, it is hard to notice any relationship.
+I will futher explore with other variables. 
+
+### Quality x Bound Sulfur Dioxide x Sulphates
+
+```{r}
+ggplot(aes(x=log10(bound.sulfur.dioxide),color = quality_3, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=log10(bound.sulfur.dioxide), y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=log10(bound.sulfur.dioxide),color = quality_2, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=log10(bound.sulfur.dioxide), y=log10(sulphates)) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph, it is hard to notice any relationship.
+I will futher explore with other variables. 
+
+### Quality x Bound Sulfur Dioxide x Citric Acid
+
+```{r}
+ggplot(aes(x=log10(bound.sulfur.dioxide),color = quality_3, y=citric.acid), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=log10(bound.sulfur.dioxide), y=citric.acid) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=log10(bound.sulfur.dioxide),color = quality_2, y=citric.acid), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=log10(bound.sulfur.dioxide), y=citric.acid) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph, it is hard to notice any relationship.
+I will futher explore with other variables. 
+
+### Quality x Sulphates x Citric Acid
+
+```{r}
+ggplot(aes(x=log10(sulphates),color = quality_3, y=citric.acid), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=log10(sulphates), y=citric.acid) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_3)
+
+ggplot(aes(x=log10(sulphates),color = quality_2, y=citric.acid), data = wine)+
+  geom_point()+
+  scale_color_brewer(type = 'div', palette = 2)
+
+ggplot(aes(x=log10(sulphates), y=citric.acid) , data = wine)+
+  geom_point()+
+  facet_wrap(~quality_2)
+```
+
+From looking at the graph, it is hard to notice any relationship but I could notice that high quality wine tends to have higher sulphates compared low quality wine. 
+I will futher explore with other variables. 
+
+## Multivariate Analysis
+
+For most of the plots, it was hard to identify a strong relationship among variables. As it was shwon in univariate analysis, alcohol seemed to have most influence on the quality of wine than other variables. 
+
+## Final Plots and Summary
+
+### Plot One
+
+```{r}
+ggplot(aes(y=alcohol, x=quality, color=quality), data = wine)+
+  geom_boxplot()+
+  scale_y_continuous(name = "Alcohol Level")+
+  scale_x_discrete(name = "Quality of Red Wine")+
+  ggtitle("Boxplot of alcohol level by quality of red wines")+
+  scale_color_brewer(name= "Quality", palette="Set2")
+```
+
+### Description One
+
+The plot indicates that wines with high quality tends to have high alcohol level compared to wines with low quality. 
+
+### Plot Two
+
+```{r}
+ggplot(aes(x=(volatile.acidity)^(1/3),color = quality_2, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_y_continuous(name = "Sulphates")+
+  scale_x_continuous(name = "Volatile Acidity")+
+  scale_color_brewer(name = "Quality", type = 'div', palette = 2)+
+  ggtitle("Scatter plot of sulphates by volatile acidity and quality of red wine")
+```
+
+### Description Two
+
+Even though it is not evident, we could notice that high quality wine tends to have high sulphates and low volatile acidity compared to low quality wine. However, it would hard to predict a wine quality through just looking at sulphates and volatile acidity of red wine due to high variance. 
+
+### Plot Three
+```{r}
+ggplot(aes(x=(volatile.acidity)^(1/3), color = alcohol_lev, y=log10(sulphates)), data = wine)+
+  geom_point()+
+  scale_y_continuous(name = "Sulphates")+
+  scale_x_continuous(name = "Volatile Acidity")+
+  scale_color_brewer(name = "Alcohol Level", type = 'div', palette = 2)+
+  facet_wrap(~quality_2)+
+  ggtitle("Scatter plot of sulphates by volatile acidity, alcohol, and quality of red wine")
+```
+
+### Description Three
+
+From looking at the plot we could notice that high quality wine tends to have high alcohol level, sulphates, and volatile acidity compared to low quality wines. As mention before, the relationship is not strong enough to predict quality of red wine based on its alcohol level, sulphates and volatile acidity. 
+
+### Reflection
+
+The red wine data set contained 1600 red wine with 12 variables. I have explored each variables distribution and bivariate model to identify relationship between variables and quality of red wine. Since quality of red wine was a categorical variable, I couldn't use linear model but I have used boxplots to see relationship. The difficulty with boxplots was there was exact standard to conclude whether the relationship bewteen quality and variable was strong enough. Especially, with small number of the data, variance was too large to identify the relationship. With numerous limitation, I still found alcohol, sulphates, and volatile acidity to have most influence on the quality of red wine. 
+
+From this project, I realize the quality of red wine, which is decided by wine experts, is more complex to be explained by those 12 given variables. For next time, I hope there could be more variables as price of the wine and data to explore. 
